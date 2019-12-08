@@ -19,7 +19,7 @@ const Canvas = ({ canvas, totalCanvasSize }) => {
     }, []);
     
     if (totalCanvasSize) {
-        range(0, totalCanvasSize).map(value => content.push(
+        range(1, totalCanvasSize + 1).map(value => content.push(
             <div id={value} key={value} className={`canvas-item canvas-item-${value}`} />
         ));
         contentStyle.gridTemplateColumns = `repeat(${canvas.width}, ${GRID_SIZE}px)`;

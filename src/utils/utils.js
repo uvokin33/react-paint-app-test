@@ -26,10 +26,27 @@ export const minMax = (value0, value1) => {
 };
 
 export const range = (start, end, step = 1) => 
-    _.range(start, end, step)
+    _.range(start, end, step);
 
-export const getCellId = (x, y, width) => 
-    `${x + (y * width)}`;
+export const isOutBounds = (x, y, width, height) => {
+    if (
+        x < 1 || 
+        x > width || 
+        y < 1 || 
+        y > height
+    ) {
+        return true;
+    }
+    return false;
+};
+
+export const getCellId = (x, y, canvas) => {
+    const { width, height } = canvas;
+    if (isOutBounds(x, y, width, height)) {
+        return '';
+    }
+    return `${x + ((y - 1) * width)}`;
+};
 
 export const getCell = (id) => {
     const result = document.getElementById(id);
@@ -79,9 +96,9 @@ export const loadFile = () => {
 };
 
 export const clearCanvas = (canvas, setContentToSave) => {
-    range(0, canvas.width).forEach(x => {
-        range(0, canvas.height).forEach(y => {
-            const cell = getCell(getCellId(x, y, canvas.width));
+    range(1, canvas.width + 1).forEach(x => {
+        range(1, canvas.height + 1).forEach(y => {
+            const cell = getCell(getCellId(x, y, canvas));
             if (cell) {
                 cell.innerHTML = "";
             }
@@ -169,13 +186,13 @@ export const createCanvas = (data, canvas, setCanvas, setContentToSave) => {
 
 export const drawLine = (canvas, rangeX, rangeY, startY, endX) => {
     range(rangeX.min, rangeX.max + 1).forEach(x => {
-        const cellX = getCell(getCellId(x, startY, canvas.width));
+        const cellX = getCell(getCellId(x, startY, canvas));
         if (cellX) {
             cellX.innerHTML = PASTE_SYMBOL;
         }
     });
     range(rangeY.min, rangeY.max + 1).forEach(y => {
-        const cellY = getCell(getCellId(endX, y, canvas.width));
+        const cellY = getCell(getCellId(endX, y, canvas));
         if (cellY) {
             cellY.innerHTML = PASTE_SYMBOL;
         }
@@ -185,17 +202,17 @@ export const drawLine = (canvas, rangeX, rangeY, startY, endX) => {
 export const drawRect = (canvas, rangeX, rangeY, startX, startY, endX, endY) => {
     range(rangeX.min, rangeX.max).forEach(x => {
         [startY, endY].forEach(y => {
-            const cellX = getCell(getCellId(x, y, canvas.width));
+            const cellX = getCell(getCellId(x, y, canvas));
             if (cellX) {
                 cellX.innerHTML = PASTE_SYMBOL;
             }
         })
         range(rangeY.min, rangeY.max + 1).forEach(y => {
             [startX, endX].forEach(x => {
-                if (x >= canvas.width) {
+                if (x > canvas.width) {
                     return;
                 }
-                const cellY = getCell(getCellId(x, y, canvas.width));
+                const cellY = getCell(getCellId(x, y, canvas));
                 if (cellY) {
                     cellY.innerHTML = PASTE_SYMBOL;
                 }
@@ -205,24 +222,23 @@ export const drawRect = (canvas, rangeX, rangeY, startX, startY, endX, endY) => 
 };
 
 export const fillArea = (color, canvas, startX, startY) => {
-    if (
-        startX < 0 || 
-        startX > canvas.width || 
-        startY < 0 || 
-        startY > canvas.height
-    ) {
+    const { width, height } = canvas;
+    if (isOutBounds(startX, startY, width, height)) {
         return;
     }
 
-    const cell = getCell(getCellId(startX, startY, canvas.width));
+    const cell = getCell(getCellId(startX, startY, canvas));
     if (cell) {
         const replaceColor = cell.innerHTML;
 
-        const pixelStack = [{ x: startX, y: startY }];
+        const pixelStack = [{ 
+            x: startX, 
+            y: startY 
+        }];
         let newPos = [];
         let cellX = startX;
         let cellY = startY;
-        let cellPos = cellX + (cellY * canvas.width);
+        let cellPos = getCellId(cellX, cellY, canvas);
         let isReachLeft = false;
         let isReachRight = false;
 
@@ -230,29 +246,32 @@ export const fillArea = (color, canvas, startX, startY) => {
             newPos = pixelStack.pop();
             cellX = newPos.x;
             cellY = newPos.y;
-            cellPos = cellX + (cellY * canvas.width)
+            cellPos = getCellId(cellX, cellY, canvas);
 
-            while (cellY >= 0 && matchReplaceColor(cellPos, replaceColor)) {
+            while (cellY > 0 && matchReplaceColor(cellPos, replaceColor)) {
                 cellY -= 1;
-                cellPos -= canvas.width;
+                cellPos -= width;
             }
 
-            cellPos += canvas.width;
+            cellPos += width;
             cellY += 1;
             isReachLeft = false;
             isReachRight = false;
 
-            while (cellY <= canvas.height && matchReplaceColor(cellPos, replaceColor)) {
+            while (cellY <= height && matchReplaceColor(cellPos, replaceColor)) {
                 cellY += 1;
 
                 const fillCell = getCell(cellPos);
                 fillCell.innerHTML = color;
 
-                if (cellX >= 0) {
+                if (cellX > 0) {
                     if (matchReplaceColor(cellPos - 1, replaceColor)) {
                         if (!isReachLeft) {
-                            if (cellX > 0) {
-                                pixelStack.push({ x: cellX - 1, y: cellY - 1 })
+                            if (cellX > 1) {
+                                pixelStack.push({ 
+                                    x: cellX - 1, 
+                                    y: cellY - 1 
+                                });
                             }
                             isReachLeft = true;
                         }
@@ -260,11 +279,14 @@ export const fillArea = (color, canvas, startX, startY) => {
                         isReachLeft = false;
                     }
                 }
-                if (cellX <= canvas.width) {
+                if (cellX <= width) {
                     if (matchReplaceColor(cellPos + 1, replaceColor)) {
                         if (!isReachRight) {
-                            if (cellX + 1 < canvas.width) {
-                                pixelStack.push({ x: cellX + 1, y: cellY - 1 })
+                            if (cellX + 1 <= width) {
+                                pixelStack.push({ 
+                                    x: cellX + 1, 
+                                    y: cellY - 1 
+                                });
                             }
                             isReachRight = true;
                         }
@@ -272,37 +294,38 @@ export const fillArea = (color, canvas, startX, startY) => {
                         isReachRight = false;
                     }
                 }
-                cellPos += canvas.width;
+                cellPos += width;
             }
         }
     }
 };
 
 export const updateSaveData = (canvas, setContentToSave) => {
-    let canvasData = '';
-    range(-1, canvas.height + 1).forEach(y => {
-        range(-1, canvas.width + 1).forEach(x => {
+    const { width, height } = canvas;
+    let result = '';
+    range(0, height + 2).forEach(y => {
+        range(0, width + 2).forEach(x => {
             if (
-                (y === -1 || y === canvas.height) &&
-                (x === -1 || x === canvas.width)
+                (y === 0 || y === height + 1) &&
+                (x === 0 || x === width + 1)
             ) {
-                canvasData += '-';
-            } else if (x === -1 || x === canvas.width) {
-                canvasData += '|';
-            } else if (y === -1 || y === canvas.height) {
-                canvasData += '-';
+                result += '-';
+            } else if (x === 0 || x === width + 1) {
+                result += '|';
+            } else if (y === 0 || y === height + 1) {
+                result += '-';
             } else {
-                const cell = getCell(getCellId(x, y, canvas.width));
+                const cell = getCell(getCellId(x, y, canvas));
                 if (cell) {
-                    canvasData += cell.innerHTML ? cell.innerHTML : ' ';
+                    result += cell.innerHTML ? cell.innerHTML : ' ';
                 }
             }
-            if (x === canvas.width) {
-                canvasData += '\n';
+            if (x === width + 1) {
+                result += '\n';
             }
             
         });
     });
-    canvasData += '\n';
-    setContentToSave(prevState => prevState + canvasData);
+    result += '\n';
+    setContentToSave(prevState => prevState + result);
 };
