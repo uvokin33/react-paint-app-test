@@ -1,0 +1,38 @@
+.app-header {
+    padding: 10px;
+    margin-bottom: 10px;
+    background-color: #aaaaaa;
+    box-shadow: 0 0 10px 0 black;
+    border-radius: 10px;
+
+    .buttons-block {
+        padding: 6px;
+        border-radius: 10px;
+        box-shadow: 0 0 10px black;
+    }
+
+    .command-area {
+        position: relative;
+        display: inline-grid;
+        left: 50%;
+        transform: translateX(-50%);
+    }
+
+    .drop-area {
+        border: 2px dashed #ccc;
+        border-radius: 20px;
+        max-width: 250px;
+        font-family: sans-serif;
+        margin: 10px auto;
+        padding: 10px;
+    }
+
+    .right {
+        float: right;
+    }
+
+    button {
+        margin: 0 5px;
+
+    }
+}
