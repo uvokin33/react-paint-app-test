@@ -1,3 +1,28 @@
+## Instalation
+### `git clone https://github.com/uvokin33/react-paint-app-test.git`
+### `npm install`
+### `npm run start`
+
+## Usage
+
+## Commands
+### `C w h`
+
+Create a canwas with width(w) and height(h).
+
+### `L x1 y1 x2 y2` 
+
+Draw a line with start position(x1, y1) and end position(x2, y2). Supports only horizontal and vertical lines. 
+
+### `R x1 y1 x2 y2` 
+
+Draw a rectangle with start position(x1, y1) and end position(x2, y2).
+
+### `B x1 y1 c`
+
+Fill area in position(x1, y1) with color(c).
+
+---------------------------
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 ## Available Scripts
