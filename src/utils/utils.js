@@ -306,14 +306,13 @@ export const updateSaveData = (canvas, setContentToSave) => {
     range(0, height + 2).forEach(y => {
         range(0, width + 2).forEach(x => {
             if (
-                (y === 0 || y === height + 1) &&
-                (x === 0 || x === width + 1)
+                ((y === 0 || y === height + 1) &&
+                (x === 0 || x === width + 1)) || 
+                (y === 0 || y === height + 1)
             ) {
                 result += '-';
             } else if (x === 0 || x === width + 1) {
                 result += '|';
-            } else if (y === 0 || y === height + 1) {
-                result += '-';
             } else {
                 const cell = getCell(getCellId(x, y, canvas));
                 if (cell) {

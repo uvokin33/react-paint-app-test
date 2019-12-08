@@ -1,6 +1,6 @@
 export const GRID_SIZE = 32;
 
-export const PASTE_SYMBOL = 'X';
+export const PASTE_SYMBOL = 'x';
 
 export const TYPE_NONE = 'NONE';
 export const TYPE_CREATE = 'C';
